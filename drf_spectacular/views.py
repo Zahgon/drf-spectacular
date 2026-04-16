@@ -285,4 +285,4 @@ class SpectacularSwaggerOauthRedirectView(RedirectView):
     ``SPECTACULAR_SETTINGS.SWAGGER_UI_SETTINGS.oauth2RedirectUrl`` django settings.
     """
     def get_redirect_url(self, *args, **kwargs):
-        return _get_sidecar_url("swagger-ui-dist/oauth2-redirect.html") + "?" + self.request.GET.urlencode()
+        pass

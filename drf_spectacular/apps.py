@@ -6,4 +6,4 @@ class SpectacularConfig(AppConfig):
     verbose_name = "drf-spectacular"
 
     def ready(self):
-        import drf_spectacular.checks  # noqa: F401
+        pass

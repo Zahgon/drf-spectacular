@@ -22,46 +22,40 @@ class OpenApiYamlRenderer(BaseRenderer):
         # disable yaml advanced feature 'alias' for clean, portable, and readable output
         class Dumper(SafeDumper):
             def ignore_aliases(self, data):
-                return True
+                pass
 
         def error_detail_representer(dumper, data):
-            return dumper.represent_dict({'string': str(data), 'code': data.code})
+            pass
         Dumper.add_representer(ErrorDetail, error_detail_representer)
 
         def multiline_str_representer(dumper, data):
-            scalar = dumper.represent_str(data)
-            scalar.style = '|' if '\n' in data else None
-            return scalar
+            pass
         Dumper.add_representer(str, multiline_str_representer)
 
         def decimal_representer(dumper, data):
             # prevent emitting "!! float" tags on fractionless decimals
-            value = f'{data:f}'
-            if '.' in value:
-                return dumper.represent_scalar('tag:yaml.org,2002:float', value)
-            else:
-                return dumper.represent_scalar('tag:yaml.org,2002:int', value)
+            pass
         Dumper.add_representer(Decimal, decimal_representer)
 
         def timedelta_representer(dumper, data):
-            return dumper.represent_str(str(data.total_seconds()))
+            pass
         Dumper.add_representer(timedelta, timedelta_representer)
 
         def time_representer(dumper, data):
-            return dumper.represent_str(data.isoformat())
+            pass
         Dumper.add_representer(time, time_representer)
 
         def uuid_representer(dumper, data):
-            return dumper.represent_str(str(data))
+            pass
         Dumper.add_representer(UUID, uuid_representer)
 
         def safestring_representer(dumper, data):
             # class SafeString(str) is tricky to strip; str(x) and f"{x}" won't work
-            return dumper.represent_str(data.encode().decode())
+            pass
         Dumper.add_representer(SafeString, safestring_representer)
 
         def ordereddict_representer(dumper, data):
-            return dumper.represent_dict(dict(data))
+            pass
         Dumper.add_representer(OrderedDict, ordereddict_representer)
 
         return dump(
@@ -81,7 +75,7 @@ class OpenApiJsonRenderer(JSONRenderer):
     media_type = 'application/vnd.oai.openapi+json'
 
     def get_indent(self, accepted_media_type, renderer_context):
-        return super().get_indent(accepted_media_type, renderer_context) or 4
+        pass
 
 
 class OpenApiJsonRenderer2(OpenApiJsonRenderer):

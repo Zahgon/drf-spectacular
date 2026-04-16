@@ -45,24 +45,17 @@ class GeneratorStats:
 
     @contextlib.contextmanager
     def silence(self):
-        self.silent, tmp = True, self.silent
-        try:
-            yield
-        finally:
-            self.silent = tmp
+        pass
 
     def reset(self) -> None:
         self._warn_cache.clear()
         self._error_cache.clear()
 
     def enable_color(self) -> None:
-        self._blue = '\033[0;34m'
-        self._red = '\033[0;31m'
-        self._yellow = '\033[0;33m'
-        self._clear = '\033[0m'
+        pass
 
     def enable_trace_lineno(self) -> None:
-        self._trace_lineno = True
+        pass
 
     def _get_current_trace(self) -> Tuple[Optional[str], str]:
         source_locations = [t for t in self._traces if t[0]]
@@ -90,13 +83,7 @@ class GeneratorStats:
         cache[msg] += 1
 
     def emit_summary(self) -> None:
-        if not self.silent and (self._warn_cache or self._error_cache):
-            print(
-                f'\nSchema generation summary:\n'
-                f'Warnings: {sum(self._warn_cache.values())} ({len(self._warn_cache)} unique)\n'
-                f'Errors:   {sum(self._error_cache.values())} ({len(self._error_cache)} unique)\n',
-                file=sys.stderr
-            )
+        pass
 
 
 GENERATOR_STATS = GeneratorStats()
@@ -204,7 +191,7 @@ def isolate_view_method(view, method_name):
 
     @functools.wraps(method)
     def wrapped_method(self, request, *args, **kwargs):
-        return method(self, request, *args, **kwargs)
+        pass
 
     # wraps() will only create a shallow copy of method.__dict__. Updates to "kwargs"
     # via @extend_schema would leak to the original method. Isolate by creating a copy.

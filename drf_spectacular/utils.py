@@ -124,10 +124,10 @@ class PolymorphicProxySerializer(Serializer):
 
     @property
     def data(self):
-        self._trap()
+        pass
 
     def to_internal_value(self, data):
-        self._trap()
+        pass
 
     def to_representation(self, instance):
         self._trap()
@@ -419,153 +419,7 @@ def extend_schema(
         methods = [method.upper() for method in methods]
 
     def decorator(f):
-        BaseSchema = (
-            # explicit manually set schema or previous view annotation
-            getattr(f, 'schema', None)
-            # previously set schema with @extend_schema on views methods
-            or getattr(f, 'kwargs', {}).get('schema', None)
-            # previously set schema with @extend_schema on @api_view
-            or getattr(getattr(f, 'cls', None), 'kwargs', {}).get('schema', None)
-            # the default
-            or api_settings.DEFAULT_SCHEMA_CLASS
-        )
-
-        if not inspect.isclass(BaseSchema):
-            BaseSchema = BaseSchema.__class__
-
-        def is_in_scope(ext_schema):
-            version, _ = ext_schema.view.determine_version(
-                ext_schema.view.request,
-                **ext_schema.view.kwargs
-            )
-            version_scope = versions is None or version in versions
-            method_scope = methods is None or ext_schema.method in methods
-            return method_scope and version_scope
-
-        class ExtendedSchema(BaseSchema):
-            def get_operation(self, path, path_regex, path_prefix, method, registry):
-                self.method = method.upper()
-
-                if operation is not None and is_in_scope(self):
-                    return operation
-                return super().get_operation(path, path_regex, path_prefix, method, registry)
-
-            def is_excluded(self):
-                if exclude is not None and is_in_scope(self):
-                    return exclude
-                return super().is_excluded()
-
-            def get_operation_id(self):
-                if operation_id and is_in_scope(self):
-                    return operation_id
-                return super().get_operation_id()
-
-            def get_override_parameters(self):
-                if parameters and is_in_scope(self):
-                    return super().get_override_parameters() + parameters
-                return super().get_override_parameters()
-
-            def get_auth(self):
-                if auth is not None and is_in_scope(self):
-                    return auth
-                return super().get_auth()
-
-            def get_examples(self):
-                if examples and is_in_scope(self):
-                    return super().get_examples() + examples
-                return super().get_examples()
-
-            def get_request_serializer(self):
-                if request is not empty and is_in_scope(self):
-                    return request
-                return super().get_request_serializer()
-
-            def get_response_serializers(self):
-                if responses is not empty and is_in_scope(self):
-                    return responses
-                return super().get_response_serializers()
-
-            def get_description(self):
-                if description and is_in_scope(self):
-                    return description
-                return super().get_description()
-
-            def get_summary(self):
-                if summary and is_in_scope(self):
-                    return str(summary)
-                return super().get_summary()
-
-            def is_deprecated(self):
-                if deprecated and is_in_scope(self):
-                    return deprecated
-                return super().is_deprecated()
-
-            def get_tags(self):
-                if tags is not None and is_in_scope(self):
-                    return tags
-                return super().get_tags()
-
-            def get_extensions(self):
-                if extensions and is_in_scope(self):
-                    return extensions
-                return super().get_extensions()
-
-            def get_filter_backends(self):
-                if filters is not None and is_in_scope(self):
-                    return getattr(self.view, 'filter_backends', []) if filters else []
-                return super().get_filter_backends()
-
-            def get_callbacks(self):
-                if callbacks is not None and is_in_scope(self):
-                    return callbacks
-                return super().get_callbacks()
-
-            def get_external_docs(self):
-                if external_docs is not None and is_in_scope(self):
-                    return external_docs
-                return super().get_external_docs()
-
-        if inspect.isclass(f):
-            # either direct decoration of views, or unpacked @api_view from OpenApiViewExtension
-            if operation_id is not None or operation is not None:
-                error(
-                    f'using @extend_schema on viewset class {f.__name__} with parameters '
-                    f'operation_id or operation will most likely result in a broken schema.',
-                    delayed=f,
-                )
-            # reorder schema class MRO so that view method annotation takes precedence
-            # over view class annotation. only relevant if there is a method annotation
-            for view_method_name in get_view_method_names(view=f, schema=BaseSchema):
-                if 'schema' not in getattr(getattr(f, view_method_name), 'kwargs', {}):
-                    continue
-                view_method = isolate_view_method(f, view_method_name)
-                view_method.kwargs['schema'] = type(
-                    'ExtendedMetaSchema', (view_method.kwargs['schema'], ExtendedSchema), {}
-                )
-            # persist schema on class to provide annotation to derived view methods.
-            # the second purpose is to serve as base for view multi-annotation
-            f.schema = ExtendedSchema()
-            return f
-        elif callable(f) and hasattr(f, 'cls'):
-            # 'cls' attr signals that as_view() was called, which only applies to @api_view.
-            # keep a "unused" schema reference at root level for multi annotation convenience.
-            setattr(f.cls, 'kwargs', {'schema': ExtendedSchema})
-            # set schema on method kwargs context to emulate regular view behaviour.
-            for method in f.cls.http_method_names:
-                setattr(getattr(f.cls, method), 'kwargs', {'schema': ExtendedSchema})
-            return f
-        elif callable(f):
-            # custom actions have kwargs in their context, others don't. create it so our create_view
-            # implementation can overwrite the default schema
-            if not hasattr(f, 'kwargs'):
-                f.kwargs = {}
-            # this simulates what @action is actually doing. somewhere along the line in this process
-            # the schema is picked up from kwargs and used. it's involved my dear friends.
-            # use class instead of instance due to descriptor weakref reverse collisions
-            f.kwargs['schema'] = ExtendedSchema
-            return f
-        else:
-            return f
+        pass
 
     return decorator
 
@@ -588,9 +442,7 @@ def extend_schema_field(
     """
 
     def decorator(f):
-        set_override(f, 'field', field)
-        set_override(f, 'field_component_name', component_name)
-        return f
+        pass
 
     return decorator
 
@@ -619,21 +471,7 @@ def extend_schema_serializer(
     :param description: override the class docstring for component description
     """
     def decorator(klass):
-        if many is not None:
-            set_override(klass, 'many', many)
-        if exclude_fields:
-            set_override(klass, 'exclude_fields', exclude_fields)
-        if deprecate_fields:
-            set_override(klass, 'deprecate_fields', deprecate_fields)
-        if examples:
-            set_override(klass, 'examples', examples)
-        if extensions:
-            set_override(klass, 'extensions', extensions)
-        if component_name:
-            set_override(klass, 'component_name', component_name)
-        if description is not None:
-            set_override(klass, 'description', description)
-        return klass
+        pass
 
     return decorator
 
@@ -655,30 +493,7 @@ def extend_schema_view(**kwargs) -> Callable[[F], F]:
     """
     def decorator(view):
         # special case for @api_view. redirect decoration to enclosed WrappedAPIView
-        if callable(view) and hasattr(view, 'cls'):
-            extend_schema_view(**kwargs)(view.cls)
-            return view
-
-        available_view_methods = get_view_method_names(view)
-
-        for method_name, method_decorator in kwargs.items():
-            if method_name not in available_view_methods:
-                warn(
-                    f'@extend_schema_view argument "{method_name}" was not found on view '
-                    f'{view.__name__}. method override for "{method_name}" will be ignored.',
-                    delayed=view
-                )
-                continue
-
-            # the context of derived methods must not be altered, as it belongs to the
-            # other view. create a new context so the schema can be safely stored in the
-            # wrapped_method. view methods that are not derived can be safely altered.
-            if hasattr(method_decorator, '__iter__'):
-                for sub_method_decorator in method_decorator:
-                    sub_method_decorator(isolate_view_method(view, method_name))
-            else:
-                method_decorator(isolate_view_method(view, method_name))
-        return view
+        pass
 
     return decorator
 

@@ -195,17 +195,7 @@ def get_lib_doc_excludes():
     # do not import on package level due to potential import recursion when loading
     # extensions as recommended:  USER's settings.py -> USER EXTENSIONS -> extensions.py
     # -> plumbing.py -> DRF views -> DRF DefaultSchema -> openapi.py - plumbing.py -> Loop
-    from rest_framework import generics, views, viewsets
-    return [
-        object,
-        dict,
-        Generic,
-        views.APIView,
-        *[getattr(serializers, c) for c in dir(serializers) if c.endswith('Serializer')],
-        *[getattr(viewsets, c) for c in dir(viewsets) if c.endswith('ViewSet')],
-        *[getattr(generics, c) for c in dir(generics) if c.endswith('APIView')],
-        *[getattr(mixins, c) for c in dir(mixins) if c.endswith('Mixin')],
-    ]
+    pass
 
 
 def get_view_model(view, emit_warnings=True):
@@ -729,12 +719,11 @@ class ResolvedComponent:
 
     @property
     def key(self) -> Tuple[str, str]:
-        return self.name, self.type
+        pass
 
     @property
     def ref(self) -> _SchemaType:
-        assert self.__bool__()
-        return {'$ref': f'#/components/{self.type}/{self.name}'}
+        pass
 
 
 class ComponentIdentity:
@@ -1274,21 +1263,7 @@ def camelize_operation(path, operation):
 
 def build_mock_request(method, path, view, original_request, **kwargs):
     """ build a mocked request and use original request as reference if available """
-    request = getattr(APIRequestFactory(), method.lower())(path=path)
-    request = view.initialize_request(request)
-    if original_request:
-        request.user = original_request.user
-        request.auth = original_request.auth
-        # ignore headers related to authorization as it has been handled above.
-        # also ignore ACCEPT as the MIME type refers to SpectacularAPIView and the
-        # version (if available) has already been processed by SpectacularAPIView.
-        for name, value in original_request.META.items():
-            if not name.startswith('HTTP_'):
-                continue
-            if name in ['HTTP_ACCEPT', 'HTTP_COOKIE', 'HTTP_AUTHORIZATION']:
-                continue
-            request.META[name] = value
-    return request
+    pass
 
 
 def set_query_parameters(url, **kwargs) -> str:
